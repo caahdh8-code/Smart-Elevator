@@ -1,139 +1,264 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Smart Elevator</title>
 
   <style>
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
+      background: #f4f6f8;
       text-align: center;
-      background: #f5f5f5;
-      padding: 40px;
+      color: #222;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 50px 20px;
     }
 
     h1 {
+      font-size: 32px;
       margin-bottom: 10px;
     }
 
-    .status {
-      margin: 20px;
+    .subtitle {
       font-size: 18px;
+      color: #666;
+      margin-bottom: 35px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+    }
+
+    .section h2 {
+      font-size: 22px;
+      margin-bottom: 20px;
     }
 
     button {
       display: block;
-      width: 250px;
-      padding: 18px;
-      margin: 15px auto;
-      font-size: 20px;
+      width: 100%;
+      max-width: 300px;
+      margin: 12px auto;
+      padding: 16px;
+      font-size: 18px;
+      font-weight: bold;
       border: none;
       border-radius: 10px;
       cursor: pointer;
-    }
-
-    button:hover {
-      opacity: 0.8;
-    }
-
-    .floor {
       background: #2196F3;
       color: white;
     }
 
-    .emergency {
-      background: red;
-      color: white;
+    button:hover {
+      opacity: 0.85;
+    }
+
+    .message {
+      margin-top: 40px;
+      padding: 30px 20px;
+      background: white;
+      border-radius: 15px;
+      font-size: 20px;
+      line-height: 1.6;
+    }
+
+    .message strong {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 
 <body>
 
-  <h1>SMART ELEVATOR</h1>
-  <p>Select your floor</p>
+  <div class="container">
 
-  <button class="floor" onclick="selectFloor(1)">
-    FLOOR 1
-  </button>
+    <h1>SMART ELEVATOR</h1>
 
-  <button class="floor" onclick="selectFloor(2)">
-    FLOOR 2
-  </button>
+    <p class="subtitle">
+      Elevator Control System
+    </p>
 
-  <button class="floor" onclick="selectFloor(3)">
-    FLOOR 3
-  </button>
+    <!-- CURRENT FLOOR -->
+    <div id="currentFloorSection" class="section">
 
-  <button class="emergency" onclick="emergencyStop()">
-    EMERGENCY STOP
-  </button>
+      <h2>Select Current Floor</h2>
 
-  <div class="status" id="status">
-    System Ready
+      <button onclick="selectCurrentFloor(1)">
+        Floor 1
+      </button>
+
+      <button onclick="selectCurrentFloor(2)">
+        Floor 2
+      </button>
+
+      <button onclick="selectCurrentFloor(3)">
+        Floor 3
+      </button>
+
+    </div>
+
+
+    <!-- DESTINATION FLOOR -->
+    <div id="destinationSection" class="section hidden">
+
+      <h2>Select Destination Floor</h2>
+
+      <button onclick="selectDestinationFloor(1)">
+        Floor 1
+      </button>
+
+      <button onclick="selectDestinationFloor(2)">
+        Floor 2
+      </button>
+
+      <button onclick="selectDestinationFloor(3)">
+        Floor 3
+      </button>
+
+    </div>
+
+
+    <!-- MESSAGE -->
+    <div id="message" class="message hidden"></div>
+
   </div>
+
 
 <script>
 
-const firebaseURL =
-"https://smart-elevator-8be27-default-rtdb.asia-southeast1.firebasedatabase.app";
+  // Firebase Realtime Database
+  const firebaseURL =
+    "https://smart-elevator-8be27-default-rtdb.asia-southeast1.firebasedatabase.app";
 
-async function selectFloor(floor) {
 
-  try {
+  // Store current floor
+  let currentFloor = 0;
 
-    await fetch(firebaseURL + "/command/floor.json", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(floor)
-    });
 
-    await fetch(firebaseURL + "/command/emergency.json", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(false)
-    });
+  // STEP 1
+  function selectCurrentFloor(floor) {
 
-    document.getElementById("status").innerText =
-      "Floor " + floor + " selected";
+    currentFloor = floor;
 
-  } catch (error) {
+    // Hide current floor buttons
+    document.getElementById("currentFloorSection")
+      .classList.add("hidden");
 
-    document.getElementById("status").innerText =
-      "Connection error";
-
-    console.error(error);
+    // Show destination floor buttons
+    document.getElementById("destinationSection")
+      .classList.remove("hidden");
   }
-}
 
-async function emergencyStop() {
 
-  try {
+  // STEP 2
+  async function selectDestinationFloor(destinationFloor) {
 
-    await fetch(firebaseURL + "/command/emergency.json", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(true)
-    });
+    // Hide destination buttons
+    document.getElementById("destinationSection")
+      .classList.add("hidden");
 
-    document.getElementById("status").innerText =
-      "EMERGENCY STOP";
 
-  } catch (error) {
+    // SAME FLOOR
+    if (currentFloor === destinationFloor) {
 
-    document.getElementById("status").innerText =
-      "Connection error";
+      showMessage(
+        "You are already on this floor."
+      );
 
-    console.error(error);
+      return;
+    }
+
+
+    // DIFFERENT FLOOR
+    showMessage(
+      "<strong>Please wait for the lift.</strong>" +
+      "You will go to Floor " + destinationFloor + "."
+    );
+
+
+    // Send data to Firebase
+    try {
+
+      // Current floor
+      await fetch(
+        firebaseURL + "/command/currentFloor.json",
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify(currentFloor)
+        }
+      );
+
+
+      // Destination floor
+      await fetch(
+        firebaseURL + "/command/destinationFloor.json",
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify(destinationFloor)
+        }
+      );
+
+
+      // Emergency OFF
+      await fetch(
+        firebaseURL + "/command/emergency.json",
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify(false)
+        }
+      );
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        "Connection error. Please try again."
+      );
+
+    }
+
   }
-}
+
+
+  // DISPLAY MESSAGE
+  function showMessage(text) {
+
+    const message =
+      document.getElementById("message");
+
+    message.innerHTML = text;
+
+    message.classList.remove("hidden");
+  }
 
 </script>
 
