@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Elevator</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f5f5f5;
+      padding: 40px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .status {
+      margin: 20px;
+      font-size: 18px;
+    }
+
+    button {
+      display: block;
+      width: 250px;
+      padding: 18px;
+      margin: 15px auto;
+      font-size: 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.8;
+    }
+
+    .floor {
+      background: #2196F3;
+      color: white;
+    }
+
+    .emergency {
+      background: red;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>SMART ELEVATOR</h1>
+  <p>Select your floor</p>
+
+  <button class="floor" onclick="selectFloor(1)">
+    FLOOR 1
+  </button>
+
+  <button class="floor" onclick="selectFloor(2)">
+    FLOOR 2
+  </button>
+
+  <button class="floor" onclick="selectFloor(3)">
+    FLOOR 3
+  </button>
+
+  <button class="emergency" onclick="emergencyStop()">
+    EMERGENCY STOP
+  </button>
+
+  <div class="status" id="status">
+    System Ready
+  </div>
+
+<script>
+
+const firebaseURL =
+"https://smart-elevator-8be27-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+async function selectFloor(floor) {
+
+  try {
+
+    await fetch(firebaseURL + "/command/floor.json", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(floor)
+    });
+
+    await fetch(firebaseURL + "/command/emergency.json", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(false)
+    });
+
+    document.getElementById("status").innerText =
+      "Floor " + floor + " selected";
+
+  } catch (error) {
+
+    document.getElementById("status").innerText =
+      "Connection error";
+
+    console.error(error);
+  }
+}
+
+async function emergencyStop() {
+
+  try {
+
+    await fetch(firebaseURL + "/command/emergency.json", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(true)
+    });
+
+    document.getElementById("status").innerText =
+      "EMERGENCY STOP";
+
+  } catch (error) {
+
+    document.getElementById("status").innerText =
+      "Connection error";
+
+    console.error(error);
+  }
+}
+
+</script>
+
+</body>
+</html>
