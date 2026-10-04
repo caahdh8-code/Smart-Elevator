@@ -3,72 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Pintar Smart Lift</title>
+    <title>Smart Elevator System</title>
     
     <!-- SDK Firebase CDN Klasik (Wajib untuk kestabilan penuh di GitHub Pages) -->
     <script src="https://gstatic.com"></script>
     <script src="https://gstatic.com"></script>
 
     <style>
-        /* Reka bentuk tema satu warna minimalis profesional (Slate Grey) */
-        body { font-family: 'Arial', sans-serif; text-align: center; background: #f4f5f7; color: #333; margin-top: 50px; }
-        .container { max-width: 400px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); min-height: 350px; display: flex; flex-direction: column; justify-content: center; }
-        h1 { font-size: 26px; color: #2c3e50; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
-        h3 { font-size: 20px; color: #495057; margin-top: 20px; }
+        /* Reka bentuk tema satu warna minimalis kelabu (Slate Grey) mengikut gambar */
+        body { font-family: 'Arial', sans-serif; text-align: center; background: #c2c2c2; color: #1a1a1a; margin: 0; padding-top: 50px; }
+        .container { max-width: 450px; margin: auto; background: #dbdbdb; padding: 40px 20px; border-radius: 0px; min-height: 500px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         
-        .btn { padding: 20px; width: 85%; margin: 12px auto; font-size: 20px; font-weight: bold; cursor: pointer; border-radius: 8px; border: 2px solid #495057; background: #495057; color: white; transition: 0.2s; display: block; }
-        .btn:hover { background: #343a40; border-color: #343a40; }
+        /* Gaya Ikon Pintu Lif Mengikut Grafik Gambar */
+        .lift-icon { width: 100px; height: 100px; border: 4px solid #1a1a1a; position: relative; margin-bottom: 25px; background: #dbdbdb; }
+        .lift-icon::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; background: #1a1a1a; transform: translateX(-50%); }
+        .lift-arrow { position: absolute; right: -30px; top: 35px; width: 15px; height: 30px; border: 3px solid #1a1a1a; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 2px 0; box-sizing: border-box; }
+        .lift-arrow::before { content: '▲'; font-size: 8px; line-height: 1; }
+        .lift-arrow::after { content: '▼'; font-size: 8px; line-height: 1; }
+
+        h2 { font-size: 28px; font-weight: bold; margin: 5px 0; color: #1a1a1a; text-transform: none; }
+        p.sub-title { font-size: 16px; margin: 5px 0 35px 0; color: #404040; font-weight: 500; }
         
-        .status-box { font-size: 18px; margin-bottom: 25px; padding: 12px; background: #e9ecef; color: #495057; border-radius: 6px; font-weight: bold; border: 1px solid #ced4da; }
+        /* Susunan Butang Melintang (Horizontal Row) Mengikut Gambar */
+        .btn-row { display: flex; justify-content: center; gap: 15px; width: 100%; max-width: 360px; }
+        
+        /* Gaya Butang Petak Kelabu Segi Empat */
+        .btn { padding: 20px 0; width: 100px; font-size: 32px; font-weight: bold; cursor: pointer; border-radius: 12px; border: none; background: #b8b8b8; color: #1a1a1a; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.15), 0 4px 6px rgba(0,0,0,0.1); transition: 0.1s; }
+        .btn:active { transform: translateY(2px); box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15), 0 2px 3px rgba(0,0,0,0.1); }
+        
+        .status-box { font-size: 16px; margin-bottom: 20px; padding: 8px 20px; background: #a8a8a8; color: #1a1a1a; border-radius: 20px; font-weight: bold; }
         .hidden { display: none !important; }
-        .info-text { font-size: 14px; color: #6c757d; margin-bottom: 20px; }
         
-        .message-success { font-size: 22px; font-weight: bold; color: #28a745; margin-top: 30px; }
-        .message-alert { font-size: 16px; font-weight: bold; color: #dc3545; margin-top: 10px; }
+        .message-success { font-size: 24px; font-weight: bold; color: #2e7d32; margin-top: 20px; }
+        .message-alert { font-size: 16px; font-weight: bold; color: #c62828; margin-top: 20px; }
         
-        .btn-secondary { background: transparent; color: #6c757d; border: 2px solid #6c757d; font-size: 14px; padding: 10px; width: 40%; }
-        .btn-secondary:hover { background: #e9ecef; color: #343a40; }
+        .btn-back { background: transparent; border: 2px solid #404040; font-size: 14px; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 30px; font-weight: bold; color: #404040; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Smart Lift System</h1>
     
-    <!-- Status kedudukan fizikal lif semasa dikesan PLC -->
+    <!-- Grafik Ikon Lif Industri -->
+    <div class="lift-icon">
+        <div class="lift-arrow"></div>
+    </div>
+    
+    <!-- Paparan Status Aras Semasa Lif Dari PLC -->
     <div id="lift-status" class="status-box">Status Lif: Tingkat <span id="current">0</span></div>
     
-    <!-- PERINGKAT 1: PILIH TINGKAT SEMASA USER -->
+    <!-- HALAMAN 1: PILIH TINGKAT SEMASA -->
     <div id="page-current">
-        <h3>Pilih Tingkat Semasa Anda</h3>
-        <p class="info-text">(Di manakah anda sedang menunggu sekarang?)</p>
-        <button class="btn" onclick="pilihTingkatSemasa(1)">TINGKAT 1</button>
-        <button class="btn" onclick="pilihTingkatSemasa(2)">TINGKAT 2</button>
-        <button class="btn" onclick="pilihTingkatSemasa(3)">TINGKAT 3</button>
+        <h2>Select Your Current Floor</h2>
+        <p class="sub-title">(Pilih lantai anda terkini)</p>
+        
+        <div class="btn-row">
+            <button class="btn" onclick="pilihTingkatSemasa(1)">1</button>
+            <button class="btn" onclick="pilihTingkatSemasa(2)">2</button>
+            <button class="btn" onclick="pilihTingkatSemasa(3)">3</button>
+        </div>
     </div>
 
-    <!-- PERINGKAT 2: PILIH TINGKAT DESTINASI -->
+    <!-- HALAMAN 2: PILIH TINGKAT DESTINASI -->
     <div id="page-destination" class="hidden">
-        <h3>Pilih Tingkat Destinasi</h3>
-        <p class="info-text">(Ke manakah arah tingkat yang ingin dituju?)</p>
-        <button class="btn" id="dBtn1" onclick="pilihTingkatDestinasi(1)">TINGKAT 1</button>
-        <button class="btn" id="dBtn2" onclick="pilihTingkatDestinasi(2)">TINGKAT 2</button>
-        <button class="btn" id="dBtn3" onclick="pilihTingkatDestinasi(3)">TINGKAT 3</button>
+        <h2>Select Your Destination Floor</h2>
+        <p class="sub-title">(Pilih anda ingin ke lantai berapa)</p>
+        
+        <div class="btn-row">
+            <button class="btn" onclick="pilihTingkatDestinasi(1)">1</button>
+            <button class="btn" onclick="pilihTingkatDestinasi(2)">2</button>
+            <button class="btn" onclick="pilihTingkatDestinasi(3)">3</button>
+        </div>
+        
         <div id="alert-msg" class="message-alert hidden">You are already at this floor</div>
-        <br>
-        <button class="btn btn-secondary" onclick="kembaliKeHalamanUtama()">◀ Kembali</button>
+        <button class="btn-back" onclick="kembaliKeHalamanUtama()">◀ Kembali</button>
     </div>
 
-    <!-- PERINGKAT 3: SKRIN SELESAI (GO TO YOUR DESTINATION) -->
+    <!-- HALAMAN 3: SKRIN SELESAI -->
     <div id="page-success" class="hidden">
         <div class="message-success">Go to your destination...</div>
-        <p class="info-text" style="margin-top:20px;">Sistem sedang memproses pergerakan lif fizikal anda.</p>
-        <button class="btn btn-secondary" onclick="resetSistemUntukUserBaru()" style="width:60%; margin-top:30px;">Pengguna Baharu</button>
+        <p style="color: #404040; font-size: 14px; margin-top: 10px;">Sistem sedang menggerakkan lif fizikal anda.</p>
+        <button class="btn-back" onclick="resetSistemUntukUserBaru()" style="margin-top: 40px;">Pengguna Baharu</button>
     </div>
 </div>
 
 <script>
-  // Rujukan konfigurasi pangkalan data projek anda
   const firebaseConfig = {
     apiKey: "AIzaSyBCFpNma5QPo0iQEHpVpHQ04Kk_Ki5M1q8",
     authDomain: "://firebaseapp.com",
@@ -80,7 +99,6 @@
     measurementId: "G-RR569DGJ5Y"
   };
 
-  // Pemicu sistem Firebase
   firebase.initializeApp(firebaseConfig);
   const database = firebase.database();
 
@@ -92,42 +110,35 @@
 
   let selectedCurrentFloor = 0;
 
-  // --- 1. ARAHAN SELEKSI TINGKAT SEMASA ---
+  // --- 1. PROSES SELEKSI TINGKAT SEMASA ---
   function pilihTingkatSemasa(tingkat) {
     selectedCurrentFloor = tingkat;
     
-    // Tukar skrin visual serta-merta tanpa lag internet
+    // Alihkan skrin serta-merta secara melintang (GitHub style!)
     pageCurrent.classList.add('hidden');
     pageDestination.classList.remove('hidden');
     alertMsg.classList.add('hidden');
-
-    // Paparkan semula semua butang destinasi
-    document.getElementById('dBtn1').classList.remove('hidden');
-    document.getElementById('dBtn2').classList.remove('hidden');
-    document.getElementById('dBtn3').classList.remove('hidden');
-
-    // LOGIK UTAMA: Sembunyikan butang destinasi yang SAMA dengan tingkat semasa user berdiri
-    document.getElementById('dBtn' + tingkat).classList.add('hidden');
   }
 
-  // --- 2. ARAHAN SELEKSI TINGKAT DESTINASI ---
+  // --- 2. PROSES SELEKSI TINGKAT DESTINASI ---
   function pilihTingkatDestinasi(tingkatDestinasi) {
+    // SEMAKAN KESELAMATAN: Jika destinasi SAMA dengan tingkat semasa berdiri
     if (tingkatDestinasi === selectedCurrentFloor) {
       alertMsg.classList.remove('hidden');
       return; 
     }
 
-    // Hitung arah pergerakan automatik
+    // Hitung arah aliran untuk Modbus RTU PLC
     let arahPergerakan = "IDLE";
     if (tingkatDestinasi > selectedCurrentFloor) arahPergerakan = "NAIK";
     else if (tingkatDestinasi < selectedCurrentFloor) arahPergerakan = "TURUN";
 
-    // Alihkan skrin serta-merta ke paparan penutup "Go to your destination..."
+    // Sorokkan butang, paparkan skrin kejayaan bersih "Go to your destination..."
     pageDestination.classList.add('hidden');
     liftStatus.classList.add('hidden');
     pageSuccess.classList.remove('hidden');
 
-    // Hantar data secara latar belakang ke Firebase Cloud
+    // Suntik data secara latar belakang ke Firebase RTDB
     database.ref('CurrentFloor').set(selectedCurrentFloor);
     database.ref('TargetFloor').set(tingkatDestinasi);
     database.ref('Status').set(arahPergerakan);
@@ -145,7 +156,7 @@
     selectedCurrentFloor = 0;
   }
 
-  // Membaca status lokasi lif fizikal semasa dikesan oleh PLC secara live
+  // Mengemas kini data kedudukan lif semasa dikesan PLC secara live
   database.ref('CurrentFloor').on('value', (snapshot) => {
     const data = snapshot.val();
     document.getElementById('current').innerText = data !== null ? data : 0;
