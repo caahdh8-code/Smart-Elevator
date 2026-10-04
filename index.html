@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Pintar Smart Lift</title>
+    
+    <!-- SDK Firebase CDN Klasik (Wajib untuk kestabilan penuh di GitHub Pages) -->
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
+
     <style>
         /* Reka bentuk tema satu warna minimalis profesional (Slate Grey) */
         body { font-family: 'Arial', sans-serif; text-align: center; background: #f4f5f7; color: #333; margin-top: 50px; }
@@ -11,7 +16,6 @@
         h1 { font-size: 26px; color: #2c3e50; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
         h3 { font-size: 20px; color: #495057; margin-top: 20px; }
         
-        /* Tema warna Slate Grey seragam */
         .btn { padding: 20px; width: 85%; margin: 12px auto; font-size: 20px; font-weight: bold; cursor: pointer; border-radius: 8px; border: 2px solid #495057; background: #495057; color: white; transition: 0.2s; display: block; }
         .btn:hover { background: #343a40; border-color: #343a40; }
         
@@ -31,43 +35,40 @@
 <div class="container">
     <h1>Smart Lift System</h1>
     
-    <!-- Status kedudukan lif semasa dikesan PLC -->
+    <!-- Status kedudukan fizikal lif semasa dikesan PLC -->
     <div id="lift-status" class="status-box">Status Lif: Tingkat <span id="current">0</span></div>
     
-    <!-- FASA 1: PILIH TINGKAT SEMASA USER -->
+    <!-- PERINGKAT 1: PILIH TINGKAT SEMASA USER -->
     <div id="page-current">
         <h3>Pilih Tingkat Semasa Anda</h3>
         <p class="info-text">(Di manakah anda sedang menunggu sekarang?)</p>
-        <button class="btn" id="cBtn1">TINGKAT 1</button>
-        <button class="btn" id="cBtn2">TINGKAT 2</button>
-        <button class="btn" id="cBtn3">TINGKAT 3</button>
+        <button class="btn" onclick="pilihTingkatSemasa(1)">TINGKAT 1</button>
+        <button class="btn" onclick="pilihTingkatSemasa(2)">TINGKAT 2</button>
+        <button class="btn" onclick="pilihTingkatSemasa(3)">TINGKAT 3</button>
     </div>
 
-    <!-- FASA 2: PILIH TINGKAT DESTINASI -->
+    <!-- PERINGKAT 2: PILIH TINGKAT DESTINASI -->
     <div id="page-destination" class="hidden">
         <h3>Pilih Tingkat Destinasi</h3>
         <p class="info-text">(Ke manakah arah tingkat yang ingin dituju?)</p>
-        <button class="btn" id="dBtn1">TINGKAT 1</button>
-        <button class="btn" id="dBtn2">TINGKAT 2</button>
-        <button class="btn" id="dBtn3">TINGKAT 3</button>
+        <button class="btn" id="dBtn1" onclick="pilihTingkatDestinasi(1)">TINGKAT 1</button>
+        <button class="btn" id="dBtn2" onclick="pilihTingkatDestinasi(2)">TINGKAT 2</button>
+        <button class="btn" id="dBtn3" onclick="pilihTingkatDestinasi(3)">TINGKAT 3</button>
         <div id="alert-msg" class="message-alert hidden">You are already at this floor</div>
         <br>
-        <button class="btn btn-secondary" id="btnBack">◀ Kembali</button>
+        <button class="btn btn-secondary" onclick="kembaliKeHalamanUtama()">◀ Kembali</button>
     </div>
 
-    <!-- FASA 3: SKRIN SELESAI -->
+    <!-- PERINGKAT 3: SKRIN SELESAI (GO TO YOUR DESTINATION) -->
     <div id="page-success" class="hidden">
         <div class="message-success">Go to your destination...</div>
         <p class="info-text" style="margin-top:20px;">Sistem sedang memproses pergerakan lif fizikal anda.</p>
-        <button class="btn btn-secondary" id="btnReset" style="width:60%; margin-top:30px;">Pengguna Baharu</button>
+        <button class="btn btn-secondary" onclick="resetSistemUntukUserBaru()" style="width:60%; margin-top:30px;">Pengguna Baharu</button>
     </div>
 </div>
 
-<script type="module">
-  import { initializeApp } from "https://gstatic.com";
-  import { getDatabase, ref, set, onValue } from "https://gstatic.com";
-
-  // Rujukan konfigurasi rasmi pangkalan data projek anda
+<script>
+  // Rujukan konfigurasi pangkalan data projek anda
   const firebaseConfig = {
     apiKey: "AIzaSyBCFpNma5QPo0iQEHpVpHQ04Kk_Ki5M1q8",
     authDomain: "://firebaseapp.com",
@@ -79,8 +80,9 @@
     measurementId: "G-RR569DGJ5Y"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const database = getDatabase(app);
+  // Pemicu sistem Firebase
+  firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
 
   const pageCurrent = document.getElementById('page-current');
   const pageDestination = document.getElementById('page-destination');
@@ -90,62 +92,61 @@
 
   let selectedCurrentFloor = 0;
 
-  // --- 1. PROSES TINGKAT SEMASA (Peringkat 1) ---
-  function prosesTingkatSemasa(tingkat) {
+  // --- 1. ARAHAN SELEKSI TINGKAT SEMASA ---
+  function pilihTingkatSemasa(tingkat) {
     selectedCurrentFloor = tingkat;
     
-    // Alihkan skrin serta-merta tanpa lag talian internet (Optimistic UI)
+    // Tukar skrin visual serta-merta tanpa lag internet
     pageCurrent.classList.add('hidden');
     pageDestination.classList.remove('hidden');
     alertMsg.classList.add('hidden');
+
+    // Paparkan semula semua butang destinasi
+    document.getElementById('dBtn1').classList.remove('hidden');
+    document.getElementById('dBtn2').classList.remove('hidden');
+    document.getElementById('dBtn3').classList.remove('hidden');
+
+    // LOGIK UTAMA: Sembunyikan butang destinasi yang SAMA dengan tingkat semasa user berdiri
+    document.getElementById('dBtn' + tingkat).classList.add('hidden');
   }
 
-  // --- 2. PROSES TINGKAT DESTINASI (Peringkat 2) ---
-  function prosesTingkatDestinasi(tingkatDestinasi) {
+  // --- 2. ARAHAN SELEKSI TINGKAT DESTINASI ---
+  function pilihTingkatDestinasi(tingkatDestinasi) {
     if (tingkatDestinasi === selectedCurrentFloor) {
       alertMsg.classList.remove('hidden');
       return; 
     }
 
-    // Kira arah pergerakan lif automatik untuk dihantar ke Modbus PLC
+    // Hitung arah pergerakan automatik
     let arahPergerakan = "IDLE";
     if (tingkatDestinasi > selectedCurrentFloor) arahPergerakan = "NAIK";
     else if (tingkatDestinasi < selectedCurrentFloor) arahPergerakan = "TURUN";
 
-    // Alihkan paparan terus ke skrin kejayaan biar sistem terasa sangat smooth
+    // Alihkan skrin serta-merta ke paparan penutup "Go to your destination..."
     pageDestination.classList.add('hidden');
     liftStatus.classList.add('hidden');
     pageSuccess.classList.remove('hidden');
 
-    // Hantar data sekuensial secara latar belakang ke Firebase
-    set(ref(database, 'CurrentFloor'), selectedCurrentFloor);
-    set(ref(database, 'TargetFloor'), tingkatDestinasi);
-    set(ref(database, 'Status'), arahPergerakan);
+    // Hantar data secara latar belakang ke Firebase Cloud
+    database.ref('CurrentFloor').set(selectedCurrentFloor);
+    database.ref('TargetFloor').set(tingkatDestinasi);
+    database.ref('Status').set(arahPergerakan);
   }
 
-  document.getElementById('cBtn1').addEventListener('click', () => prosesTingkatSemasa(1));
-  document.getElementById('cBtn2').addEventListener('click', () => prosesTingkatSemasa(2));
-  document.getElementById('cBtn3').addEventListener('click', () => prosesTingkatSemasa(3));
-
-  document.getElementById('dBtn1').addEventListener('click', () => prosesTingkatDestinasi(1));
-  document.getElementById('dBtn2').addEventListener('click', () => prosesTingkatDestinasi(2));
-  document.getElementById('dBtn3').addEventListener('click', () => prosesTingkatDestinasi(3));
-
-  document.getElementById('btnBack').addEventListener('click', () => {
+  function kembaliKeHalamanUtama() {
     pageDestination.classList.add('hidden');
     pageCurrent.classList.remove('hidden');
-  });
+  }
 
-  document.getElementById('btnReset').addEventListener('click', () => {
+  function resetSistemUntukUserBaru() {
     pageSuccess.classList.add('hidden');
     liftStatus.classList.remove('hidden');
     pageCurrent.classList.remove('hidden');
     selectedCurrentFloor = 0;
-  });
+  }
 
-  // Membaca status lokasi fizikal lif secara live dari Firebase (dikemaskini PLC)
-  const currentLiveRef = ref(database, 'CurrentFloor');
-  onValue(currentLiveRef, (snapshot) => {
+  // Membaca status lokasi lif fizikal semasa dikesan oleh PLC secara live
+  database.ref('CurrentFloor').on('value', (snapshot) => {
     const data = snapshot.val();
     document.getElementById('current').innerText = data !== null ? data : 0;
   });
