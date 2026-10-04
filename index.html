@@ -1,167 +1,700 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Elevator System</title>
-    
-    <!-- SDK Firebase CDN Klasik (Wajib untuk kestabilan penuh di GitHub Pages) -->
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        /* Reka bentuk tema satu warna minimalis kelabu (Slate Grey) mengikut gambar */
-        body { font-family: 'Arial', sans-serif; text-align: center; background: #c2c2c2; color: #1a1a1a; margin: 0; padding-top: 50px; }
-        .container { max-width: 450px; margin: auto; background: #dbdbdb; padding: 40px 20px; border-radius: 0px; min-height: 500px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        
-        /* Gaya Ikon Pintu Lif Mengikut Grafik Gambar */
-        .lift-icon { width: 100px; height: 100px; border: 4px solid #1a1a1a; position: relative; margin-bottom: 25px; background: #dbdbdb; }
-        .lift-icon::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; background: #1a1a1a; transform: translateX(-50%); }
-        .lift-arrow { position: absolute; right: -30px; top: 35px; width: 15px; height: 30px; border: 3px solid #1a1a1a; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 2px 0; box-sizing: border-box; }
-        .lift-arrow::before { content: '▲'; font-size: 8px; line-height: 1; }
-        .lift-arrow::after { content: '▼'; font-size: 8px; line-height: 1; }
+  <title>Smart Elevator</title>
 
-        h2 { font-size: 28px; font-weight: bold; margin: 5px 0; color: #1a1a1a; text-transform: none; }
-        p.sub-title { font-size: 16px; margin: 5px 0 35px 0; color: #404040; font-weight: 500; }
-        
-        /* Susunan Butang Melintang (Horizontal Row) Mengikut Gambar */
-        .btn-row { display: flex; justify-content: center; gap: 15px; width: 100%; max-width: 360px; }
-        
-        /* Gaya Butang Petak Kelabu Segi Empat */
-        .btn { padding: 20px 0; width: 100px; font-size: 32px; font-weight: bold; cursor: pointer; border-radius: 12px; border: none; background: #b8b8b8; color: #1a1a1a; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.15), 0 4px 6px rgba(0,0,0,0.1); transition: 0.1s; }
-        .btn:active { transform: translateY(2px); box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15), 0 2px 3px rgba(0,0,0,0.1); }
-        
-        .status-box { font-size: 16px; margin-bottom: 20px; padding: 8px 20px; background: #a8a8a8; color: #1a1a1a; border-radius: 20px; font-weight: bold; }
-        .hidden { display: none !important; }
-        
-        .message-success { font-size: 24px; font-weight: bold; color: #2e7d32; margin-top: 20px; }
-        .message-alert { font-size: 16px; font-weight: bold; color: #c62828; margin-top: 20px; }
-        
-        .btn-back { background: transparent; border: 2px solid #404040; font-size: 14px; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 30px; font-weight: bold; color: #404040; }
-    </style>
-</head>
-<body>
+  <!-- Firebase Compat / Classic -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-<div class="container">
-    
-    <!-- Grafik Ikon Lif Industri -->
-    <div class="lift-icon">
-        <div class="lift-arrow"></div>
-    </div>
-    
-    <!-- Paparan Status Aras Semasa Lif Dari PLC -->
-    <div id="lift-status" class="status-box">Status Lif: Tingkat <span id="current">0</span></div>
-    
-    <!-- HALAMAN 1: PILIH TINGKAT SEMASA -->
-    <div id="page-current">
-        <h2>Select Your Current Floor</h2>
-        <p class="sub-title">(Pilih lantai anda terkini)</p>
-        
-        <div class="btn-row">
-            <button class="btn" onclick="pilihTingkatSemasa(1)">1</button>
-            <button class="btn" onclick="pilihTingkatSemasa(2)">2</button>
-            <button class="btn" onclick="pilihTingkatSemasa(3)">3</button>
-        </div>
-    </div>
+  <style>
 
-    <!-- HALAMAN 2: PILIH TINGKAT DESTINASI -->
-    <div id="page-destination" class="hidden">
-        <h2>Select Your Destination Floor</h2>
-        <p class="sub-title">(Pilih anda ingin ke lantai berapa)</p>
-        
-        <div class="btn-row">
-            <button class="btn" onclick="pilihTingkatDestinasi(1)">1</button>
-            <button class="btn" onclick="pilihTingkatDestinasi(2)">2</button>
-            <button class="btn" onclick="pilihTingkatDestinasi(3)">3</button>
-        </div>
-        
-        <div id="alert-msg" class="message-alert hidden">You are already at this floor</div>
-        <button class="btn-back" onclick="kembaliKeHalamanUtama()">◀ Kembali</button>
-    </div>
-
-    <!-- HALAMAN 3: SKRIN SELESAI -->
-    <div id="page-success" class="hidden">
-        <div class="message-success">Go to your destination...</div>
-        <p style="color: #404040; font-size: 14px; margin-top: 10px;">Sistem sedang menggerakkan lif fizikal anda.</p>
-        <button class="btn-back" onclick="resetSistemUntukUserBaru()" style="margin-top: 40px;">Pengguna Baharu</button>
-    </div>
-</div>
-
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBCFpNma5QPo0iQEHpVpHQ04Kk_Ki5M1q8",
-    authDomain: "://firebaseapp.com",
-    databaseURL: "https://firebasedatabase.app",
-    projectId: "smart-lift-touchless",
-    storageBucket: "smart-lift-touchless.firebasestorage.app",
-    messagingSenderId: "1014801320552",
-    appId: "1:1014801320552:web:08f6e19041336b2c9a09dd",
-    measurementId: "G-RR569DGJ5Y"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  const database = firebase.database();
-
-  const pageCurrent = document.getElementById('page-current');
-  const pageDestination = document.getElementById('page-destination');
-  const pageSuccess = document.getElementById('page-success');
-  const alertMsg = document.getElementById('alert-msg');
-  const liftStatus = document.getElementById('lift-status');
-
-  let selectedCurrentFloor = 0;
-
-  // --- 1. PROSES SELEKSI TINGKAT SEMASA ---
-  function pilihTingkatSemasa(tingkat) {
-    selectedCurrentFloor = tingkat;
-    
-    // Alihkan skrin serta-merta secara melintang (GitHub style!)
-    pageCurrent.classList.add('hidden');
-    pageDestination.classList.remove('hidden');
-    alertMsg.classList.add('hidden');
-  }
-
-  // --- 2. PROSES SELEKSI TINGKAT DESTINASI ---
-  function pilihTingkatDestinasi(tingkatDestinasi) {
-    // SEMAKAN KESELAMATAN: Jika destinasi SAMA dengan tingkat semasa berdiri
-    if (tingkatDestinasi === selectedCurrentFloor) {
-      alertMsg.classList.remove('hidden');
-      return; 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
     }
 
-    // Hitung arah aliran untuk Modbus RTU PLC
-    let arahPergerakan = "IDLE";
-    if (tingkatDestinasi > selectedCurrentFloor) arahPergerakan = "NAIK";
-    else if (tingkatDestinasi < selectedCurrentFloor) arahPergerakan = "TURUN";
+    body {
+      min-height: 100vh;
+      background: #d9dde0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #27313a;
+      padding: 20px;
+    }
 
-    // Sorokkan butang, paparkan skrin kejayaan bersih "Go to your destination..."
-    pageDestination.classList.add('hidden');
-    liftStatus.classList.add('hidden');
-    pageSuccess.classList.remove('hidden');
+    .app {
+      width: 100%;
+      max-width: 500px;
+      min-height: 700px;
 
-    // Suntik data secara latar belakang ke Firebase RTDB
-    database.ref('CurrentFloor').set(selectedCurrentFloor);
-    database.ref('TargetFloor').set(tingkatDestinasi);
-    database.ref('Status').set(arahPergerakan);
-  }
+      background: #b9bec2;
 
-  function kembaliKeHalamanUtama() {
-    pageDestination.classList.add('hidden');
-    pageCurrent.classList.remove('hidden');
-  }
+      border-radius: 22px;
 
-  function resetSistemUntukUserBaru() {
-    pageSuccess.classList.add('hidden');
-    liftStatus.classList.remove('hidden');
-    pageCurrent.classList.remove('hidden');
-    selectedCurrentFloor = 0;
-  }
+      box-shadow:
+        0 12px 35px rgba(0,0,0,0.18);
 
-  // Mengemas kini data kedudukan lif semasa dikesan PLC secara live
-  database.ref('CurrentFloor').on('value', (snapshot) => {
-    const data = snapshot.val();
-    document.getElementById('current').innerText = data !== null ? data : 0;
-  });
-</script>
+      padding: 40px 25px;
+
+      text-align: center;
+    }
+
+    /* =========================
+       LIFT ICON
+       ========================= */
+
+    .lift {
+      width: 150px;
+      height: 150px;
+
+      border: 8px solid #384149;
+
+      background: #cbd0d4;
+
+      border-radius: 8px;
+
+      margin: 0 auto 35px;
+
+      position: relative;
+
+      box-shadow:
+        inset 0 0 0 5px #9da4aa;
+    }
+
+    .door-left,
+    .door-right {
+      position: absolute;
+
+      top: 0;
+
+      width: 50%;
+      height: 100%;
+
+      background: #c3c8cc;
+    }
+
+    .door-left {
+      left: 0;
+
+      border-right: 4px solid #384149;
+    }
+
+    .door-right {
+      right: 0;
+
+      border-left: 4px solid #384149;
+    }
+
+    /* Lift buttons */
+
+    .lift-buttons {
+      position: absolute;
+
+      right: -38px;
+      top: 35px;
+
+      width: 28px;
+      height: 65px;
+
+      background: #384149;
+
+      border-radius: 5px;
+
+      display: flex;
+      flex-direction: column;
+
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .arrow-up {
+      width: 0;
+      height: 0;
+
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+
+      border-bottom: 10px solid white;
+    }
+
+    .arrow-down {
+      width: 0;
+      height: 0;
+
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+
+      border-top: 10px solid white;
+    }
+
+    /* =========================
+       TITLE
+       ========================= */
+
+    h1 {
+      font-size: 34px;
+
+      line-height: 1.2;
+
+      margin-bottom: 10px;
+
+      color: #263039;
+    }
+
+    .subtitle {
+      font-size: 18px;
+
+      color: #4e5961;
+
+      margin-bottom: 45px;
+    }
+
+    /* =========================
+       FLOOR BUTTONS
+       ========================= */
+
+    .floor-buttons {
+      display: flex;
+
+      flex-direction: row;
+
+      justify-content: center;
+
+      gap: 15px;
+
+      width: 100%;
+    }
+
+    .floor-btn {
+      width: 120px;
+      height: 120px;
+
+      border: none;
+
+      border-radius: 15px;
+
+      background: #cbd0d4;
+
+      color: #27313a;
+
+      font-size: 42px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+
+      box-shadow:
+        0 6px 12px rgba(0,0,0,0.15);
+
+      transition: 0.15s;
+    }
+
+    .floor-btn:hover {
+      background: #d5d9dc;
+
+      transform: translateY(-2px);
+    }
+
+    .floor-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* =========================
+       WARNING
+       ========================= */
+
+    #warning {
+      margin-top: 25px;
+
+      min-height: 25px;
+
+      color: #c62828;
+
+      font-size: 18px;
+
+      font-weight: bold;
+    }
+
+    /* =========================
+       PAGE 2
+       ========================= */
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* =========================
+       FINAL PAGE
+       ========================= */
+
+    #finalPage {
+      display: none;
+
+      min-height: 620px;
+
+      align-items: center;
+
+      justify-content: center;
+    }
+
+    #finalPage h2 {
+      font-size: 42px;
+
+      line-height: 1.2;
+
+      color: #27313a;
+    }
+
+    #finalStatus {
+      margin-top: 20px;
+
+      font-size: 17px;
+
+      color: #56616a;
+    }
+
+    /* =========================
+       MOBILE
+       ========================= */
+
+    @media (max-width: 430px) {
+
+      .app {
+        min-height: 90vh;
+
+        padding: 35px 18px;
+      }
+
+      .lift {
+        width: 125px;
+        height: 125px;
+
+        margin-bottom: 30px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .subtitle {
+        font-size: 16px;
+
+        margin-bottom: 35px;
+      }
+
+      .floor-buttons {
+        gap: 10px;
+      }
+
+      .floor-btn {
+        width: 95px;
+        height: 95px;
+
+        font-size: 34px;
+      }
+
+      #finalPage h2 {
+        font-size: 34px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="app">
+
+    <!-- =================================================
+         PAGE 1
+         CURRENT FLOOR
+         ================================================= -->
+
+    <div id="currentPage">
+
+      <!-- Lift Graphic -->
+      <div class="lift">
+
+        <div class="door-left"></div>
+        <div class="door-right"></div>
+
+        <div class="lift-buttons">
+
+          <div class="arrow-up"></div>
+
+          <div class="arrow-down"></div>
+
+        </div>
+
+      </div>
+
+      <h1>
+        Select Your Current Floor
+      </h1>
+
+      <div class="subtitle">
+        (Pilih lantai anda terkini)
+      </div>
+
+      <!-- Floor Buttons -->
+
+      <div class="floor-buttons">
+
+        <button
+          class="floor-btn"
+          onclick="selectCurrentFloor(1)">
+          1
+        </button>
+
+        <button
+          class="floor-btn"
+          onclick="selectCurrentFloor(2)">
+          2
+        </button>
+
+        <button
+          class="floor-btn"
+          onclick="selectCurrentFloor(3)">
+          3
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================
+         PAGE 2
+         DESTINATION FLOOR
+         ================================================= -->
+
+    <div id="destinationPage" class="hidden">
+
+      <!-- Lift Graphic -->
+
+      <div class="lift">
+
+        <div class="door-left"></div>
+        <div class="door-right"></div>
+
+        <div class="lift-buttons">
+
+          <div class="arrow-up"></div>
+
+          <div class="arrow-down"></div>
+
+        </div>
+
+      </div>
+
+
+      <h1>
+        Select Your Destination Floor
+      </h1>
+
+      <div class="subtitle">
+        (Pilih anda ingin ke lantai berapa)
+      </div>
+
+
+      <!-- Destination Buttons -->
+
+      <div class="floor-buttons">
+
+        <button
+          class="floor-btn"
+          onclick="selectDestinationFloor(1)">
+          1
+        </button>
+
+        <button
+          class="floor-btn"
+          onclick="selectDestinationFloor(2)">
+          2
+        </button>
+
+        <button
+          class="floor-btn"
+          onclick="selectDestinationFloor(3)">
+          3
+        </button>
+
+      </div>
+
+
+      <!-- Same Floor Warning -->
+
+      <div id="warning"></div>
+
+    </div>
+
+
+    <!-- =================================================
+         FINAL PAGE
+         ================================================= -->
+
+    <div id="finalPage">
+
+      <div>
+
+        <h2>
+          Go to your destination...
+        </h2>
+
+        <div id="finalStatus"></div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =================================================
+       JAVASCRIPT
+       ================================================= -->
+
+  <script>
+
+    /* =================================================
+       FIREBASE CONFIGURATION
+       ================================================= */
+
+    var firebaseConfig = {
+
+      apiKey:
+        "AIzaSyBCFpNma5QPo0iQEHpVpHQ04Kk_Ki5M1q8",
+
+      authDomain:
+        "smart-lift-touchless.firebaseapp.com",
+
+      databaseURL:
+        "https://smart-elevator-8be27-default-rtdb.asia-southeast1.firebasedatabase.app",
+
+      projectId:
+        "smart-lift-touchless"
+
+    };
+
+
+    /* Start Firebase */
+
+    firebase.initializeApp(firebaseConfig);
+
+
+    var database =
+      firebase.database();
+
+
+    /* =================================================
+       VARIABLES
+       ================================================= */
+
+    var currentFloor = null;
+
+
+    /* =================================================
+       PAGE 1
+       USER SELECT CURRENT FLOOR
+       ================================================= */
+
+    function selectCurrentFloor(floor) {
+
+      currentFloor = Number(floor);
+
+      console.log(
+        "Current Floor:",
+        currentFloor
+      );
+
+
+      /*
+        Optimistic UI
+
+        Page terus bertukar tanpa tunggu Firebase.
+      */
+
+      document
+        .getElementById("currentPage")
+        .classList
+        .add("hidden");
+
+
+      document
+        .getElementById("destinationPage")
+        .classList
+        .remove("hidden");
+
+
+      document
+        .getElementById("warning")
+        .innerText = "";
+
+    }
+
+
+    /* =================================================
+       PAGE 2
+       USER SELECT DESTINATION
+       ================================================= */
+
+    function selectDestinationFloor(destination) {
+
+      destination = Number(destination);
+
+
+      console.log(
+        "Destination Floor:",
+        destination
+      );
+
+
+      /* ===============================
+         SAFETY CHECK
+         =============================== */
+
+      if (destination === currentFloor) {
+
+        document
+          .getElementById("warning")
+          .innerText =
+          "You are already at this floor";
+
+        return;
+
+      }
+
+
+      /* ===============================
+         DETERMINE DIRECTION
+         =============================== */
+
+      var status;
+
+
+      if (destination > currentFloor) {
+
+        status = "NAIK";
+
+      }
+
+      else {
+
+        status = "TURUN";
+
+      }
+
+
+      console.log(
+        "Status:",
+        status
+      );
+
+
+      /* ===============================
+         OPTIMISTIC UI
+         =============================== */
+
+      document
+        .getElementById("destinationPage")
+        .classList
+        .add("hidden");
+
+
+      document
+        .getElementById("finalPage")
+        .style
+        .display = "flex";
+
+
+      document
+        .getElementById("finalStatus")
+        .innerText =
+        "Floor " +
+        currentFloor +
+        " → Floor " +
+        destination;
+
+
+      /* ===============================
+         SEND TO FIREBASE
+         =============================== */
+
+      sendToFirebase(
+        currentFloor,
+        destination,
+        status
+      );
+
+    }
+
+
+    /* =================================================
+       FIREBASE FUNCTION
+       ================================================= */
+
+    function sendToFirebase(
+      current,
+      target,
+      status
+    ) {
+
+      var data = {
+
+        CurrentFloor:
+          Number(current),
+
+        TargetFloor:
+          Number(target),
+
+        Status:
+          String(status)
+
+      };
+
+
+      /*
+        Firebase structure:
+
+        command
+          CurrentFloor: 1
+          TargetFloor: 2
+          Status: "NAIK"
+      */
+
+      database
+        .ref("command")
+        .set(data)
+
+        .then(function() {
+
+          console.log(
+            "Firebase data sent successfully"
+          );
+
+          console.log(data);
+
+        })
+
+        .catch(function(error) {
+
+          console.error(
+            "Firebase error:",
+            error
+          );
+
+        });
+
+    }
+
+  </script>
 
 </body>
 </html>
