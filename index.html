@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Smart Elevator</title>
 
-  <!-- Firebase Compat / Classic -->
+  <!-- Firebase Compat Version -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
 
   <style>
 
@@ -21,36 +23,49 @@
 
     body {
       min-height: 100vh;
+
       background: #d9dde0;
+
       display: flex;
       justify-content: center;
       align-items: center;
-      color: #27313a;
+
       padding: 20px;
+
+      color: #26313a;
     }
 
-    .app {
+
+    /* =========================
+       MAIN CONTAINER
+       ========================= */
+
+    .container {
+
       width: 100%;
-      max-width: 500px;
-      min-height: 700px;
+      max-width: 520px;
+
+      min-height: 720px;
 
       background: #b9bec2;
 
-      border-radius: 22px;
+      border-radius: 20px;
 
-      box-shadow:
-        0 12px 35px rgba(0,0,0,0.18);
-
-      padding: 40px 25px;
+      padding: 45px 25px;
 
       text-align: center;
+
+      box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+
     }
 
+
     /* =========================
-       LIFT ICON
+       LIFT IMAGE / GRAPHIC
        ========================= */
 
     .lift {
+
       width: 150px;
       height: 150px;
 
@@ -58,43 +73,58 @@
 
       background: #cbd0d4;
 
-      border-radius: 8px;
-
       margin: 0 auto 35px;
 
       position: relative;
 
+      border-radius: 6px;
+
       box-shadow:
         inset 0 0 0 5px #9da4aa;
+
     }
 
-    .door-left,
-    .door-right {
+
+    .door-left {
+
       position: absolute;
 
+      left: 0;
       top: 0;
 
       width: 50%;
       height: 100%;
 
-      background: #c3c8cc;
-    }
-
-    .door-left {
-      left: 0;
+      background: #c4c9cd;
 
       border-right: 4px solid #384149;
+
     }
+
 
     .door-right {
+
+      position: absolute;
+
       right: 0;
+      top: 0;
+
+      width: 50%;
+      height: 100%;
+
+      background: #c4c9cd;
 
       border-left: 4px solid #384149;
+
     }
 
-    /* Lift buttons */
 
-    .lift-buttons {
+    /* =========================
+       SMALL LIFT BUTTON
+       ========================= */
+
+    .lift-control {
+
       position: absolute;
 
       right: -38px;
@@ -108,13 +138,18 @@
       border-radius: 5px;
 
       display: flex;
+
       flex-direction: column;
 
       justify-content: space-around;
+
       align-items: center;
+
     }
 
+
     .arrow-up {
+
       width: 0;
       height: 0;
 
@@ -122,9 +157,12 @@
       border-right: 7px solid transparent;
 
       border-bottom: 10px solid white;
+
     }
 
+
     .arrow-down {
+
       width: 0;
       height: 0;
 
@@ -132,47 +170,59 @@
       border-right: 7px solid transparent;
 
       border-top: 10px solid white;
+
     }
+
 
     /* =========================
        TITLE
        ========================= */
 
     h1 {
+
       font-size: 34px;
 
       line-height: 1.2;
 
       margin-bottom: 10px;
 
-      color: #263039;
+      color: #26313a;
+
     }
+
 
     .subtitle {
+
       font-size: 18px;
 
-      color: #4e5961;
+      color: #4d5961;
 
       margin-bottom: 45px;
+
     }
+
 
     /* =========================
        FLOOR BUTTONS
        ========================= */
 
     .floor-buttons {
+
       display: flex;
 
-      flex-direction: row;
-
       justify-content: center;
+
+      align-items: center;
 
       gap: 15px;
 
       width: 100%;
+
     }
 
-    .floor-btn {
+
+    .floor-button {
+
       width: 120px;
       height: 120px;
 
@@ -182,7 +232,7 @@
 
       background: #cbd0d4;
 
-      color: #27313a;
+      color: #26313a;
 
       font-size: 42px;
 
@@ -194,23 +244,43 @@
         0 6px 12px rgba(0,0,0,0.15);
 
       transition: 0.15s;
+
     }
 
-    .floor-btn:hover {
+
+    .floor-button:hover {
+
       background: #d5d9dc;
 
       transform: translateY(-2px);
+
     }
 
-    .floor-btn:active {
+
+    .floor-button:active {
+
       transform: scale(0.95);
+
     }
+
+
+    /* =========================
+       HIDE PAGE
+       ========================= */
+
+    .hidden {
+
+      display: none !important;
+
+    }
+
 
     /* =========================
        WARNING
        ========================= */
 
     #warning {
+
       margin-top: 25px;
 
       min-height: 25px;
@@ -220,45 +290,46 @@
       font-size: 18px;
 
       font-weight: bold;
+
     }
 
-    /* =========================
-       PAGE 2
-       ========================= */
-
-    .hidden {
-      display: none !important;
-    }
 
     /* =========================
        FINAL PAGE
        ========================= */
 
     #finalPage {
+
       display: none;
 
-      min-height: 620px;
+      min-height: 600px;
+
+      justify-content: center;
 
       align-items: center;
 
-      justify-content: center;
     }
 
+
     #finalPage h2 {
-      font-size: 42px;
+
+      font-size: 40px;
 
       line-height: 1.2;
 
-      color: #27313a;
     }
 
+
     #finalStatus {
+
       margin-top: 20px;
 
       font-size: 17px;
 
       color: #56616a;
+
     }
+
 
     /* =========================
        MOBILE
@@ -266,435 +337,512 @@
 
     @media (max-width: 430px) {
 
-      .app {
+      .container {
+
         min-height: 90vh;
 
         padding: 35px 18px;
+
       }
 
+
       .lift {
+
         width: 125px;
         height: 125px;
 
-        margin-bottom: 30px;
       }
+
 
       h1 {
+
         font-size: 28px;
+
       }
+
 
       .subtitle {
+
         font-size: 16px;
 
-        margin-bottom: 35px;
       }
+
 
       .floor-buttons {
+
         gap: 10px;
+
       }
 
-      .floor-btn {
+
+      .floor-button {
+
         width: 95px;
         height: 95px;
 
         font-size: 34px;
+
       }
 
-      #finalPage h2 {
-        font-size: 34px;
-      }
     }
 
   </style>
+
 </head>
+
 
 <body>
 
-  <div class="app">
 
-    <!-- =================================================
-         PAGE 1
-         CURRENT FLOOR
-         ================================================= -->
+<div class="container">
 
-    <div id="currentPage">
 
-      <!-- Lift Graphic -->
-      <div class="lift">
+  <!-- =================================================
+       PAGE 1
+       CURRENT FLOOR
+       ================================================= -->
 
-        <div class="door-left"></div>
-        <div class="door-right"></div>
+  <div id="currentPage">
 
-        <div class="lift-buttons">
 
-          <div class="arrow-up"></div>
+    <!-- Lift Graphic -->
 
-          <div class="arrow-down"></div>
+    <div class="lift">
 
-        </div>
+      <div class="door-left"></div>
 
-      </div>
+      <div class="door-right"></div>
 
-      <h1>
-        Select Your Current Floor
-      </h1>
+      <div class="lift-control">
 
-      <div class="subtitle">
-        (Pilih lantai anda terkini)
-      </div>
+        <div class="arrow-up"></div>
 
-      <!-- Floor Buttons -->
-
-      <div class="floor-buttons">
-
-        <button
-          class="floor-btn"
-          onclick="selectCurrentFloor(1)">
-          1
-        </button>
-
-        <button
-          class="floor-btn"
-          onclick="selectCurrentFloor(2)">
-          2
-        </button>
-
-        <button
-          class="floor-btn"
-          onclick="selectCurrentFloor(3)">
-          3
-        </button>
+        <div class="arrow-down"></div>
 
       </div>
 
     </div>
 
 
-    <!-- =================================================
-         PAGE 2
-         DESTINATION FLOOR
-         ================================================= -->
+    <h1>
 
-    <div id="destinationPage" class="hidden">
+      Select Your Current Floor
 
-      <!-- Lift Graphic -->
-
-      <div class="lift">
-
-        <div class="door-left"></div>
-        <div class="door-right"></div>
-
-        <div class="lift-buttons">
-
-          <div class="arrow-up"></div>
-
-          <div class="arrow-down"></div>
-
-        </div>
-
-      </div>
+    </h1>
 
 
-      <h1>
-        Select Your Destination Floor
-      </h1>
+    <div class="subtitle">
 
-      <div class="subtitle">
-        (Pilih anda ingin ke lantai berapa)
-      </div>
-
-
-      <!-- Destination Buttons -->
-
-      <div class="floor-buttons">
-
-        <button
-          class="floor-btn"
-          onclick="selectDestinationFloor(1)">
-          1
-        </button>
-
-        <button
-          class="floor-btn"
-          onclick="selectDestinationFloor(2)">
-          2
-        </button>
-
-        <button
-          class="floor-btn"
-          onclick="selectDestinationFloor(3)">
-          3
-        </button>
-
-      </div>
-
-
-      <!-- Same Floor Warning -->
-
-      <div id="warning"></div>
+      (Pilih lantai anda terkini)
 
     </div>
 
 
-    <!-- =================================================
-         FINAL PAGE
-         ================================================= -->
+    <!-- Buttons 1 2 3 -->
 
-    <div id="finalPage">
+    <div class="floor-buttons">
 
-      <div>
+      <button
+        class="floor-button"
+        onclick="selectCurrentFloor(1)">
+        1
+      </button>
 
-        <h2>
-          Go to your destination...
-        </h2>
 
-        <div id="finalStatus"></div>
+      <button
+        class="floor-button"
+        onclick="selectCurrentFloor(2)">
+        2
+      </button>
+
+
+      <button
+        class="floor-button"
+        onclick="selectCurrentFloor(3)">
+        3
+      </button>
+
+    </div>
+
+
+  </div>
+
+
+
+  <!-- =================================================
+       PAGE 2
+       DESTINATION FLOOR
+       ================================================= -->
+
+  <div
+    id="destinationPage"
+    class="hidden"
+  >
+
+
+    <!-- Lift Graphic -->
+
+    <div class="lift">
+
+      <div class="door-left"></div>
+
+      <div class="door-right"></div>
+
+      <div class="lift-control">
+
+        <div class="arrow-up"></div>
+
+        <div class="arrow-down"></div>
 
       </div>
+
+    </div>
+
+
+    <h1>
+
+      Select Your Destination Floor
+
+    </h1>
+
+
+    <div class="subtitle">
+
+      (Pilih anda ingin ke lantai berapa)
+
+    </div>
+
+
+    <!-- Buttons 1 2 3 -->
+
+    <div class="floor-buttons">
+
+      <button
+        class="floor-button"
+        onclick="selectDestinationFloor(1)">
+        1
+      </button>
+
+
+      <button
+        class="floor-button"
+        onclick="selectDestinationFloor(2)">
+        2
+      </button>
+
+
+      <button
+        class="floor-button"
+        onclick="selectDestinationFloor(3)">
+        3
+      </button>
+
+    </div>
+
+
+    <!-- Warning -->
+
+    <div id="warning"></div>
+
+
+  </div>
+
+
+
+  <!-- =================================================
+       FINAL PAGE
+       ================================================= -->
+
+  <div id="finalPage">
+
+    <div>
+
+      <h2>
+
+        Go to your destination...
+
+      </h2>
+
+
+      <div id="finalStatus"></div>
 
     </div>
 
   </div>
 
 
-  <!-- =================================================
-       JAVASCRIPT
-       ================================================= -->
-
-  <script>
-
-    /* =================================================
-       FIREBASE CONFIGURATION
-       ================================================= */
-
-    var firebaseConfig = {
-
-      apiKey:
-        "AIzaSyBCFpNma5QPo0iQEHpVpHQ04Kk_Ki5M1q8",
-
-      authDomain:
-        "smart-lift-touchless.firebaseapp.com",
-
-      databaseURL:
-        "https://smart-elevator-8be27-default-rtdb.asia-southeast1.firebasedatabase.app",
-
-      projectId:
-        "smart-lift-touchless"
-
-    };
+</div>
 
 
-    /* Start Firebase */
 
-    firebase.initializeApp(firebaseConfig);
-
-
-    var database =
-      firebase.database();
+<script>
 
 
-    /* =================================================
-       VARIABLES
-       ================================================= */
-
-    var currentFloor = null;
+/* =====================================================
+   FIREBASE
+   ===================================================== */
 
 
-    /* =================================================
-       PAGE 1
-       USER SELECT CURRENT FLOOR
-       ================================================= */
+var firebaseConfig = {
 
-    function selectCurrentFloor(floor) {
+  apiKey:
+    "AIzaSyBCFpNma5QPo0iQEHpVpHQ04Kk_Ki5M1q8",
 
-      currentFloor = Number(floor);
+  databaseURL:
+    "https://smart-elevator-8be27-default-rtdb.asia-southeast1.firebasedatabase.app",
+
+  projectId:
+    "smart-lift-touchless"
+
+};
+
+
+firebase.initializeApp(firebaseConfig);
+
+
+var database =
+  firebase.database();
+
+
+
+/* =====================================================
+   VARIABLE CURRENT FLOOR
+   ===================================================== */
+
+
+var currentFloor = null;
+
+
+
+/* =====================================================
+   PAGE 1
+   SELECT CURRENT FLOOR
+   ===================================================== */
+
+
+function selectCurrentFloor(floor) {
+
+
+  // Simpan current floor
+
+  currentFloor = Number(floor);
+
+
+  console.log(
+    "Current Floor Selected:",
+    currentFloor
+  );
+
+
+  /*
+    TERUS TUKAR PAGE
+
+    Page Current Floor hilang
+    Page Destination Floor muncul
+  */
+
+
+  document
+    .getElementById("currentPage")
+    .classList
+    .add("hidden");
+
+
+  document
+    .getElementById("destinationPage")
+    .classList
+    .remove("hidden");
+
+
+  // Kosongkan warning
+
+  document
+    .getElementById("warning")
+    .innerText = "";
+
+
+}
+
+
+
+/* =====================================================
+   PAGE 2
+   SELECT DESTINATION FLOOR
+   ===================================================== */
+
+
+function selectDestinationFloor(destination) {
+
+
+  destination =
+    Number(destination);
+
+
+  console.log(
+    "Destination:",
+    destination
+  );
+
+
+  /* ==========================================
+     CHECK SAME FLOOR
+     ========================================== */
+
+
+  if (
+    destination === currentFloor
+  ) {
+
+
+    document
+      .getElementById("warning")
+      .innerText =
+      "You are already at this floor";
+
+
+    return;
+
+  }
+
+
+
+  /* ==========================================
+     DETERMINE DIRECTION
+     ========================================== */
+
+
+  var status;
+
+
+  if (
+    destination > currentFloor
+  ) {
+
+    status = "NAIK";
+
+  }
+
+  else {
+
+    status = "TURUN";
+
+  }
+
+
+
+  /* ==========================================
+     SHOW FINAL PAGE
+     ========================================== */
+
+
+  document
+    .getElementById("destinationPage")
+    .classList
+    .add("hidden");
+
+
+  document
+    .getElementById("finalPage")
+    .style
+    .display = "flex";
+
+
+  document
+    .getElementById("finalStatus")
+    .innerText =
+      "Floor " +
+      currentFloor +
+      " → Floor " +
+      destination;
+
+
+
+  /* ==========================================
+     SEND FIREBASE
+     ========================================== */
+
+
+  sendToFirebase(
+    currentFloor,
+    destination,
+    status
+  );
+
+
+}
+
+
+
+/* =====================================================
+   SEND DATA TO FIREBASE
+   ===================================================== */
+
+
+function sendToFirebase(
+  current,
+  destination,
+  status
+) {
+
+
+  var data = {
+
+
+    currentFloor:
+      Number(current),
+
+
+    destinationFloor:
+      Number(destination),
+
+
+    status:
+      String(status)
+
+
+  };
+
+
+  console.log(
+    "Sending Firebase:",
+    data
+  );
+
+
+  database
+    .ref("command")
+    .set(data)
+
+
+    .then(function() {
+
 
       console.log(
-        "Current Floor:",
-        currentFloor
+        "Firebase updated successfully"
       );
 
 
-      /*
-        Optimistic UI
-
-        Page terus bertukar tanpa tunggu Firebase.
-      */
-
-      document
-        .getElementById("currentPage")
-        .classList
-        .add("hidden");
+    })
 
 
-      document
-        .getElementById("destinationPage")
-        .classList
-        .remove("hidden");
+    .catch(function(error) {
 
 
-      document
-        .getElementById("warning")
-        .innerText = "";
-
-    }
-
-
-    /* =================================================
-       PAGE 2
-       USER SELECT DESTINATION
-       ================================================= */
-
-    function selectDestinationFloor(destination) {
-
-      destination = Number(destination);
-
-
-      console.log(
-        "Destination Floor:",
-        destination
+      console.error(
+        "Firebase Error:",
+        error
       );
 
 
-      /* ===============================
-         SAFETY CHECK
-         =============================== */
-
-      if (destination === currentFloor) {
-
-        document
-          .getElementById("warning")
-          .innerText =
-          "You are already at this floor";
-
-        return;
-
-      }
+    });
 
 
-      /* ===============================
-         DETERMINE DIRECTION
-         =============================== */
-
-      var status;
+}
 
 
-      if (destination > currentFloor) {
+</script>
 
-        status = "NAIK";
-
-      }
-
-      else {
-
-        status = "TURUN";
-
-      }
-
-
-      console.log(
-        "Status:",
-        status
-      );
-
-
-      /* ===============================
-         OPTIMISTIC UI
-         =============================== */
-
-      document
-        .getElementById("destinationPage")
-        .classList
-        .add("hidden");
-
-
-      document
-        .getElementById("finalPage")
-        .style
-        .display = "flex";
-
-
-      document
-        .getElementById("finalStatus")
-        .innerText =
-        "Floor " +
-        currentFloor +
-        " → Floor " +
-        destination;
-
-
-      /* ===============================
-         SEND TO FIREBASE
-         =============================== */
-
-      sendToFirebase(
-        currentFloor,
-        destination,
-        status
-      );
-
-    }
-
-
-    /* =================================================
-       FIREBASE FUNCTION
-       ================================================= */
-
-    function sendToFirebase(
-      current,
-      target,
-      status
-    ) {
-
-      var data = {
-
-        CurrentFloor:
-          Number(current),
-
-        TargetFloor:
-          Number(target),
-
-        Status:
-          String(status)
-
-      };
-
-
-      /*
-        Firebase structure:
-
-        command
-          CurrentFloor: 1
-          TargetFloor: 2
-          Status: "NAIK"
-      */
-
-      database
-        .ref("command")
-        .set(data)
-
-        .then(function() {
-
-          console.log(
-            "Firebase data sent successfully"
-          );
-
-          console.log(data);
-
-        })
-
-        .catch(function(error) {
-
-          console.error(
-            "Firebase error:",
-            error
-          );
-
-        });
-
-    }
-
-  </script>
 
 </body>
+
 </html>
