@@ -1,265 +1,154 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ms">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Smart Elevator</title>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      text-align: center;
-      color: #222;
-    }
-
-    .container {
-      max-width: 500px;
-      margin: 0 auto;
-      padding: 50px 20px;
-    }
-
-    h1 {
-      font-size: 32px;
-      margin-bottom: 10px;
-    }
-
-    .subtitle {
-      font-size: 18px;
-      color: #666;
-      margin-bottom: 35px;
-    }
-
-    .section {
-      margin-bottom: 30px;
-    }
-
-    .section h2 {
-      font-size: 22px;
-      margin-bottom: 20px;
-    }
-
-    button {
-      display: block;
-      width: 100%;
-      max-width: 300px;
-      margin: 12px auto;
-      padding: 16px;
-      font-size: 18px;
-      font-weight: bold;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      background: #2196F3;
-      color: white;
-    }
-
-    button:hover {
-      opacity: 0.85;
-    }
-
-    .message {
-      margin-top: 40px;
-      padding: 30px 20px;
-      background: white;
-      border-radius: 15px;
-      font-size: 20px;
-      line-height: 1.6;
-    }
-
-    .message strong {
-      display: block;
-      margin-bottom: 10px;
-    }
-
-    .hidden {
-      display: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Pintar Smart Lift</title>
+    <style>
+        /* Reka bentuk tema satu warna minimalis profesional (Slate Grey) */
+        body { font-family: 'Arial', sans-serif; text-align: center; background: #f4f5f7; color: #333; margin-top: 50px; }
+        .container { max-width: 400px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); min-height: 350px; display: flex; flex-direction: column; justify-content: center; }
+        h1 { font-size: 26px; color: #2c3e50; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        h3 { font-size: 20px; color: #495057; margin-top: 20px; }
+        
+        /* Tema warna Slate Grey seragam */
+        .btn { padding: 20px; width: 85%; margin: 12px auto; font-size: 20px; font-weight: bold; cursor: pointer; border-radius: 8px; border: 2px solid #495057; background: #495057; color: white; transition: 0.2s; display: block; }
+        .btn:hover { background: #343a40; border-color: #343a40; }
+        
+        .status-box { font-size: 18px; margin-bottom: 25px; padding: 12px; background: #e9ecef; color: #495057; border-radius: 6px; font-weight: bold; border: 1px solid #ced4da; }
+        .hidden { display: none !important; }
+        .info-text { font-size: 14px; color: #6c757d; margin-bottom: 20px; }
+        
+        .message-success { font-size: 22px; font-weight: bold; color: #28a745; margin-top: 30px; }
+        .message-alert { font-size: 16px; font-weight: bold; color: #dc3545; margin-top: 10px; }
+        
+        .btn-secondary { background: transparent; color: #6c757d; border: 2px solid #6c757d; font-size: 14px; padding: 10px; width: 40%; }
+        .btn-secondary:hover { background: #e9ecef; color: #343a40; }
+    </style>
 </head>
-
 <body>
 
-  <div class="container">
-
-    <h1>SMART ELEVATOR</h1>
-
-    <p class="subtitle">
-      Elevator Control System
-    </p>
-
-    <!-- CURRENT FLOOR -->
-    <div id="currentFloorSection" class="section">
-
-      <h2>Select Current Floor</h2>
-
-      <button onclick="selectCurrentFloor(1)">
-        Floor 1
-      </button>
-
-      <button onclick="selectCurrentFloor(2)">
-        Floor 2
-      </button>
-
-      <button onclick="selectCurrentFloor(3)">
-        Floor 3
-      </button>
-
+<div class="container">
+    <h1>Smart Lift System</h1>
+    
+    <!-- Status kedudukan lif semasa dikesan PLC -->
+    <div id="lift-status" class="status-box">Status Lif: Tingkat <span id="current">0</span></div>
+    
+    <!-- FASA 1: PILIH TINGKAT SEMASA USER -->
+    <div id="page-current">
+        <h3>Pilih Tingkat Semasa Anda</h3>
+        <p class="info-text">(Di manakah anda sedang menunggu sekarang?)</p>
+        <button class="btn" id="cBtn1">TINGKAT 1</button>
+        <button class="btn" id="cBtn2">TINGKAT 2</button>
+        <button class="btn" id="cBtn3">TINGKAT 3</button>
     </div>
 
-
-    <!-- DESTINATION FLOOR -->
-    <div id="destinationSection" class="section hidden">
-
-      <h2>Select Destination Floor</h2>
-
-      <button onclick="selectDestinationFloor(1)">
-        Floor 1
-      </button>
-
-      <button onclick="selectDestinationFloor(2)">
-        Floor 2
-      </button>
-
-      <button onclick="selectDestinationFloor(3)">
-        Floor 3
-      </button>
-
+    <!-- FASA 2: PILIH TINGKAT DESTINASI -->
+    <div id="page-destination" class="hidden">
+        <h3>Pilih Tingkat Destinasi</h3>
+        <p class="info-text">(Ke manakah arah tingkat yang ingin dituju?)</p>
+        <button class="btn" id="dBtn1">TINGKAT 1</button>
+        <button class="btn" id="dBtn2">TINGKAT 2</button>
+        <button class="btn" id="dBtn3">TINGKAT 3</button>
+        <div id="alert-msg" class="message-alert hidden">You are already at this floor</div>
+        <br>
+        <button class="btn btn-secondary" id="btnBack">◀ Kembali</button>
     </div>
 
+    <!-- FASA 3: SKRIN SELESAI -->
+    <div id="page-success" class="hidden">
+        <div class="message-success">Go to your destination...</div>
+        <p class="info-text" style="margin-top:20px;">Sistem sedang memproses pergerakan lif fizikal anda.</p>
+        <button class="btn btn-secondary" id="btnReset" style="width:60%; margin-top:30px;">Pengguna Baharu</button>
+    </div>
+</div>
 
-    <!-- MESSAGE -->
-    <div id="message" class="message hidden"></div>
+<script type="module">
+  import { initializeApp } from "https://gstatic.com";
+  import { getDatabase, ref, set, onValue } from "https://gstatic.com";
 
-  </div>
+  // Rujukan konfigurasi rasmi pangkalan data projek anda
+  const firebaseConfig = {
+    apiKey: "AIzaSyBCFpNma5QPo0iQEHpVpHQ04Kk_Ki5M1q8",
+    authDomain: "://firebaseapp.com",
+    databaseURL: "https://firebasedatabase.app",
+    projectId: "smart-lift-touchless",
+    storageBucket: "smart-lift-touchless.firebasestorage.app",
+    messagingSenderId: "1014801320552",
+    appId: "1:1014801320552:web:08f6e19041336b2c9a09dd",
+    measurementId: "G-RR569DGJ5Y"
+  };
 
+  const app = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
 
-<script>
+  const pageCurrent = document.getElementById('page-current');
+  const pageDestination = document.getElementById('page-destination');
+  const pageSuccess = document.getElementById('page-success');
+  const alertMsg = document.getElementById('alert-msg');
+  const liftStatus = document.getElementById('lift-status');
 
-  // Firebase Realtime Database
-  const firebaseURL =
-    "https://smart-elevator-8be27-default-rtdb.asia-southeast1.firebasedatabase.app";
+  let selectedCurrentFloor = 0;
 
-
-  // Store current floor
-  let currentFloor = 0;
-
-
-  // STEP 1
-  function selectCurrentFloor(floor) {
-
-    currentFloor = floor;
-
-    // Hide current floor buttons
-    document.getElementById("currentFloorSection")
-      .classList.add("hidden");
-
-    // Show destination floor buttons
-    document.getElementById("destinationSection")
-      .classList.remove("hidden");
+  // --- 1. PROSES TINGKAT SEMASA (Peringkat 1) ---
+  function prosesTingkatSemasa(tingkat) {
+    selectedCurrentFloor = tingkat;
+    
+    // Alihkan skrin serta-merta tanpa lag talian internet (Optimistic UI)
+    pageCurrent.classList.add('hidden');
+    pageDestination.classList.remove('hidden');
+    alertMsg.classList.add('hidden');
   }
 
-
-  // STEP 2
-  async function selectDestinationFloor(destinationFloor) {
-
-    // Hide destination buttons
-    document.getElementById("destinationSection")
-      .classList.add("hidden");
-
-
-    // SAME FLOOR
-    if (currentFloor === destinationFloor) {
-
-      showMessage(
-        "You are already on this floor."
-      );
-
-      return;
+  // --- 2. PROSES TINGKAT DESTINASI (Peringkat 2) ---
+  function prosesTingkatDestinasi(tingkatDestinasi) {
+    if (tingkatDestinasi === selectedCurrentFloor) {
+      alertMsg.classList.remove('hidden');
+      return; 
     }
 
+    // Kira arah pergerakan lif automatik untuk dihantar ke Modbus PLC
+    let arahPergerakan = "IDLE";
+    if (tingkatDestinasi > selectedCurrentFloor) arahPergerakan = "NAIK";
+    else if (tingkatDestinasi < selectedCurrentFloor) arahPergerakan = "TURUN";
 
-    // DIFFERENT FLOOR
-    showMessage(
-      "<strong>Please wait for the lift.</strong>" +
-      "You will go to Floor " + destinationFloor + "."
-    );
+    // Alihkan paparan terus ke skrin kejayaan biar sistem terasa sangat smooth
+    pageDestination.classList.add('hidden');
+    liftStatus.classList.add('hidden');
+    pageSuccess.classList.remove('hidden');
 
-
-    // Send data to Firebase
-    try {
-
-      // Current floor
-      await fetch(
-        firebaseURL + "/command/currentFloor.json",
-        {
-          method: "PUT",
-
-          headers: {
-            "Content-Type": "application/json"
-          },
-
-          body: JSON.stringify(currentFloor)
-        }
-      );
-
-
-      // Destination floor
-      await fetch(
-        firebaseURL + "/command/destinationFloor.json",
-        {
-          method: "PUT",
-
-          headers: {
-            "Content-Type": "application/json"
-          },
-
-          body: JSON.stringify(destinationFloor)
-        }
-      );
-
-
-      // Emergency OFF
-      await fetch(
-        firebaseURL + "/command/emergency.json",
-        {
-          method: "PUT",
-
-          headers: {
-            "Content-Type": "application/json"
-          },
-
-          body: JSON.stringify(false)
-        }
-      );
-
-
-    } catch (error) {
-
-      console.error(error);
-
-      showMessage(
-        "Connection error. Please try again."
-      );
-
-    }
-
+    // Hantar data sekuensial secara latar belakang ke Firebase
+    set(ref(database, 'CurrentFloor'), selectedCurrentFloor);
+    set(ref(database, 'TargetFloor'), tingkatDestinasi);
+    set(ref(database, 'Status'), arahPergerakan);
   }
 
+  document.getElementById('cBtn1').addEventListener('click', () => prosesTingkatSemasa(1));
+  document.getElementById('cBtn2').addEventListener('click', () => prosesTingkatSemasa(2));
+  document.getElementById('cBtn3').addEventListener('click', () => prosesTingkatSemasa(3));
 
-  // DISPLAY MESSAGE
-  function showMessage(text) {
+  document.getElementById('dBtn1').addEventListener('click', () => prosesTingkatDestinasi(1));
+  document.getElementById('dBtn2').addEventListener('click', () => prosesTingkatDestinasi(2));
+  document.getElementById('dBtn3').addEventListener('click', () => prosesTingkatDestinasi(3));
 
-    const message =
-      document.getElementById("message");
+  document.getElementById('btnBack').addEventListener('click', () => {
+    pageDestination.classList.add('hidden');
+    pageCurrent.classList.remove('hidden');
+  });
 
-    message.innerHTML = text;
+  document.getElementById('btnReset').addEventListener('click', () => {
+    pageSuccess.classList.add('hidden');
+    liftStatus.classList.remove('hidden');
+    pageCurrent.classList.remove('hidden');
+    selectedCurrentFloor = 0;
+  });
 
-    message.classList.remove("hidden");
-  }
-
+  // Membaca status lokasi fizikal lif secara live dari Firebase (dikemaskini PLC)
+  const currentLiveRef = ref(database, 'CurrentFloor');
+  onValue(currentLiveRef, (snapshot) => {
+    const data = snapshot.val();
+    document.getElementById('current').innerText = data !== null ? data : 0;
+  });
 </script>
 
 </body>
